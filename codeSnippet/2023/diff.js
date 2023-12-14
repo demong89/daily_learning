@@ -14,7 +14,7 @@ let initIndex = 0;
 
 
 const getDiff = (oldNode, newNode,index,difference)=>{
-    
+    let diffResult = [];
 }
 
 
