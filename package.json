@@ -1,0 +1,20 @@
+{
+  "name": "daily_learning",
+  "version": "1.0.0",
+  "description": "日常片段",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/demong89/daily_learning.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/demong89/daily_learning/issues"
+  },
+  "homepage": "https://github.com/demong89/daily_learning#readme"
+}
