@@ -5,5 +5,11 @@ const diff = (oldNode, newNode)=>{
 }
 
 
+const REMOVE = 'remove';
+const MODIFY_TEXT ='modify_text';
+const CHANGE_ATTRS = 'change_attrs';
+const TAKEPLACE = 'replace';
+
+let initIndex = 0;
 
 // 原文： https://mp.weixin.qq.com/s/eHaQr8ZsSvwbIwGv-IJqVg
