@@ -4,7 +4,7 @@
   "description": "日常片段",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "git": "git add . && cm_addlongname && git push"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/demong89/daily_learning/issues"
   },
-  "homepage": "https://github.com/demong89/daily_learning#readme"
+  "homepage": "https://github.com/demong89/daily_learning#readme",
+  "devDependencies": {
+    "cm_addlongname": "^1.0.8"
+  }
 }

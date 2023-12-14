@@ -1,0 +1,5 @@
+git reabse 将dev的当前提交复制到master的最新提交之后，会形成一个线性的分支树
+git merge 会让2个分支的提交按照提交时间进行排序，并且会把最新的2个commit合并成一个commit。最后的分支树呈现非线性的结构
+git rebase 不会让2个分支的提交按照提交时间进行排序，而是把2个分支的提交合并成一个commit，然后再把这个commit的父节点指向master的最新提交，形成一个线性的分支树。
+git rebase --onto 这个命令可以指定将dev分支的当前提交复制到master分支的指定提交之后，形成一个线性的分支树
+git rebase --onto master 1234567890 dev 这个命令可以将dev分支的当前提交复制到master分支的1234567890提交之后，形成一个线性的分支树
