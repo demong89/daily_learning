@@ -12,4 +12,10 @@ const TAKEPLACE = 'replace';
 
 let initIndex = 0;
 
+
+const getDiff = (oldNode, newNode,index,difference)=>{
+    
+}
+
+
 // 原文： https://mp.weixin.qq.com/s/eHaQr8ZsSvwbIwGv-IJqVg
