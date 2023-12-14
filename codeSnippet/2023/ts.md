@@ -124,3 +124,146 @@ function getLonger<T extends { length: number }>(a: T, b: T): T {
 }
 ```
 ## 对象
+### 索引签名 index signature
+
+```ts
+interface StringArray {
+    [index: number]: string;
+}
+
+const myArray: StringArray = getStringArray();
+myArrsy[0]; // type: string;
+```
+只有 string、number 和 symbol 可以用作对象 key 的类型，这也符合 JS 语言中对象 key 类型的范围
+
+如果对象的属性有不同类型，我们可以用 union 联合类型来声明值的类型:
+```ts
+interface NumberOrStringDic {
+    [key: string]: number | string;
+    length: number;
+    name: string; //  OK.
+}
+```
+### 对象泛型
+
+```ts
+// 声明
+interface Box<T> {
+    content: T;
+}
+
+// 使用
+const box: Box<string> = {
+    content: 'string value'
+}
+```
+用 type 来声明一些泛型的辅助类型
+```ts
+type OrNull<T> = T | null;
+
+type OneOrMany<T> = T | T[];
+
+type OneOrManyOrNull<T> = OrNull<OneOrMany<T>>;
+
+// 应用
+type OneOrManyOrNullStrings = OneOrManyOrNull<string>;
+```
+
+
+## 实用工具类型
+### Partial<T>
+
+```ts
+interface Todo {
+    title: string;
+    description: string;
+    completed: boolean;
+}
+
+type PartialTodo = Partial<Todo>;
+const todo: PartialTodo = {
+    title: 'Clean room',
+    description: 'Do the laundry',
+    completed: false
+};
+```
+Partial<T> 可以将一个类型的所有属性变为可选属性，即属性值变为可选类型。
+
+### Required<T>
+返回一个与 Type 属性相同但全被设为必填的新类型:
+```ts
+interface Info {
+    name?: string;
+    age?: number;
+}
+
+let requiredInfo: Required<Info>;
+/**
+    {
+       name: string;
+       age: number;
+    }
+*/
+```
+
+### Pick<Type,Keys>
+从 Type 里挑出指定的 Keys 来构造一个新类型:
+```ts
+interface Todo {
+    title: string;
+    desc: string;
+    completed: boolean;
+}
+
+type TodoPreview = Pick<Todo, 'title' | 'completed'>;
+/**
+    {
+       title: string;
+       completed: boolean;
+    }
+*/
+```
+
+### Omit<Type, Keys>
+从 Type 里剔除掉 Keys 里指定的属性，返回一个新类型:
+```ts
+interface Todo {
+    title: string;
+    desc: string;
+    completed: boolean;
+}
+
+type TodoPreview = Omit<Todo, 'title' | 'completed'>;
+/**
+    {
+       desc: string;
+   }
+```
+### Extract<UnionType, ExtractedMembers>
+取 UnionType 和 ExtractedMembers 的交集来构造一个新类型:
+```ts
+type T0 = Extract<'a' | 'b' | 'c', 'a' | 'f'>; // T0: 'a'
+
+type T1 = Extract<string | number | (() => void), Function>; // T1: () => void
+```
+
+### Exclude<UnionType, ExclusionUnion>
+从 UnionType 里移除掉 ExclusionUnion 存在的类型来构造一个新类型:
+```ts
+type T0 = Exclude<'a' | 'b' | 'c', 'a'>; // T0: 'b' | 'c'
+
+type T1 = Exclude<string | number | (() => void), Function>; // T1: string | number
+```
+
+### NonNullable<T>
+从 T 里移除 null 和 undefined 类型，返回一个新类型:
+```ts
+type T0 = NonNullable<string | number | undefined>; // T0: string | number
+```
+
+### ReturnType<T>
+
+从 T 里移除掉 undefined 和 null 来构造一个新类型:
+```ts
+type T0 = NonNullable<string | number | undefined | null>; // T0: string | number
+```
