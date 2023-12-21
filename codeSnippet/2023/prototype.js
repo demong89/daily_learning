@@ -28,3 +28,62 @@
 /**
  * 原型
  */
+
+// 构造函数
+function Person(name) {
+    this.name = name;
+}
+// 对象
+let person = new Person("张三");
+
+// 通过对象拿到原型（2种方法）
+let proto1 = Object.getPrototypeOf(person);
+let proto2 = person.__proto__;
+
+// 通过构造函数拿到原型
+let proto3 = Person.prototype;
+
+// 验证一下
+// true
+console.log(proto1 == proto2);
+// true
+console.log(proto1 == proto3);
+
+
+/**
+ * new 
+ */
+
+function _new (fn,...args){
+    var obj = Object.create(fn.prototype); // 通过Object.create指定原型，更加符合规范
+    let result = fn.apply(obj,args); // 指定this为obj对象，执行构造函数
+    // 判断构造函数的返回值是否是对象  
+    return result instanceof Object ? result : obj;
+}
+
+
+// instanceOf 的原理是判断构造函数的 prototype 属性是否在对象的原型链上。
+
+// array的原型链：Array.prototype → Object.prototype
+// let array = [];
+// // true
+// console.log(array instanceof Array);
+// // true
+// console.log(array instanceof Object);
+// // false
+// console.log(array instanceof Function);
+
+
+function _instanceOf(obj, fn){
+    while (true) {
+        obj = obj.__proto__;
+        if(obj == fn.prototype){  // 匹配上了
+            return true;
+        }
+        if(obj == null){  // 到达原型链的尽头了
+            return false;
+        }
+    }
+}
+
+
