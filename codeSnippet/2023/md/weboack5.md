@@ -220,4 +220,128 @@ module.exports = {
 自定义输出文件名方式， generator.filename 与 output.assetModuleFilename 相同，但仅适用于 type：asset 和 type：asset/resource 模块类型.
 
 
+## babel转译js
+
+```bash
+npm install -D babel-loader @babel/core @babel/preset-env
+
+npm install core-js@3
+
+```
+
++ core-js：它是JavaScript标准库的 polyfill（垫片/补丁）包集合。
++ babel-loader：在Webpack里使用babel转译js文件，
++ @babel/core：是babel的大脑，负责调度babel的各个功能模块，
+ + @babel/preset-env：babel预设，一组babel插件的集合，就不需要一个个去设置babel的插件，但是preset-env只能进行语法转换，不能弥补浏览器缺失的一些新功能，比如一些内置对象和方法，所以需要corejs来弥补老版浏览器缺失的新功能， 参数选项：
+
++ targets：不配置，会查询package.json中的browserslist，或者项目根目录下的.browserslistrc，都不设，@babel/preset-env默认会使用 browserslist config sources，实际上是
+"targets": "> 0.25%, not dead"；
++ useBuiltIns：'usage'，只对使用到的功能打补丁，core-js自动被引入按需打包；'entry'，在index.ts入口import 'core-js'，把所有的polyfill打包；
++ corejs：此选项仅在与 useBuiltIns: usage 或 useBuiltIns: entry 一起使用时有效，一般使用版本 3，会 polyfill 实例方法，而 corejs2 不会
+
+```js
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+     {
+        test: /\.m?js$/,
+        // 排除node_modules，不用转译
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  // 设置兼容目标浏览器
+                  targets: {
+                    chrome: "58",
+                    ie: "11",
+                  },
+                  // 自动引入core-js根据目标浏览器按需使用打补丁
+                  useBuiltIns: "usage",
+                  //  一般是指定 3，这个会 polyfill 实例方法，而 corejs2 不会
+                  corejs: 3,
+                },
+              ]           
+            ],
+          },
+        },
+      },
+    ],
+  },
+};
+
+```
+@babel/preset-env 转换用到的一些辅助代码是直接注入到模块里的，没有做抽离，多个模块可能会重复注入，并且用到的 polyfill 代码 core-js以及它提供的 Promise、Set 和 Map 等内置函数也是全局导入 ，会污染全局作用域，如果代码是一个打算发布以供其他人使用的库，那么它就会成为一个问题。
+
+解决这个问题就要使用 @babel/plugin-transform-runtime 插件，可以重用 Babel 的注入帮助代码以节省代码大小，依赖模块 @babel/runtime 以避免编译输出中的重复。同时也通过设置选项corejs进行polyfill，依赖@babel/runtime-corejs3,corejs: 2 仅支持全局变量（例如 Promise）和静态属性（例如 Array.from），而 corejs: 3 还支持实例属性（例如 [].includes)
+
+```bash
+pnpm add -D @babel/plugin-transform-runtime
+pnpm add @babel/runtime
+pnpm add @babel/runtime-corejs3
+
+```
+启用@babel/plugin-transform-runtime插件后，@babel/preset-env 中的 useBuiltIns 选项不得设置。 否则，此插件可能无法完全沙盒化环境。
+
+
+```js
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+     {
+        test: /\.m?js$/,
+        // 排除node_modules，不用转译
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  // 设置兼容目标浏览器
+                  targets: {
+                    chrome: "58",
+                    ie: "11",
+                  },
+                  // 自动引入core-js根据目标浏览器按需使用打补丁
+                  //  useBuiltIns: "usage",
+                  //  一般是指定 3，这个会 polyfill 实例方法，而 corejs2 不会
+                  //  corejs: 3,
+                },
+              ]           
+            ],
+            plugins: [
+              [
+                "@babel/plugin-transform-runtime",
+                {
+                 // 从@babel/runtime-corejs3 引入polyfill
+                  corejs: 3,
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+  },
+};
+
+```
+注意： babel插件在预设前运行，@babel/plugin-transform-runtime 在 @babel/preset-env 之前调用的，将不兼容的语法和api转换了，但是他没有target配置，不能按需polyfill，所以最后打包文件会变大。
+和postcss一样也可以将babel的配置提取到一个单独的文件 babel.config.js 中，在根目录下建一个babel.config.js，webpack调用babel-loader的时候，babel会读取到babel.config.js里面的配置
+
+babel的配置文件在根目录下还可以写成其他形式：
+
++ babel.config.json
++ .babelrc
++ .babelrc.js
++ .babelrc.json
++ 直接在package.json中写配置
+
 ## 
