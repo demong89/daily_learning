@@ -344,4 +344,130 @@ babel的配置文件在根目录下还可以写成其他形式：
 + .babelrc.json
 + 直接在package.json中写配置
 
-## 
+## 转译TS文件
+
+一
+如果已经使用babel-loader转译代码，可以使用 @babel/preset-typescript 以让 Babel 处理 JavaScript 和 TypeScript 文件，而不需要额外使用 loader。与 ts-loader 相反，底层的 @babel/plugin-transform-typescript 插件不执行任何类型检查
+
+```ts
+// babel.config.js
+module.exports = {
+ // 预设是从后往前执行的,ts先编译成js,再编译js
+  presets: ["@babel/preset-env",  "@babel/preset-typescript"],
+};
+
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+     {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: ["babel-loader"],    
+      },
+    ],
+  },
+};
+```
+
+二、 
+使用ts-loader ，在根目录创建 tsconfig.json，   
+
+npm install -D typescript ts-loader
+
+```json
+//  tsconfig.json
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "allowJs": true,
+    "moduleResolution": "node"
+  }
+}
+
+```
+ts-loader 使用 TypeScript 编译器 tsc，并依赖于 tsconfig.json 配置，不要将 module设置为 "CommonJS"，否则 webpack 将无法对代码进行 tree shaking
+
+```js
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+     {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: ["ts-loader"],    
+      },
+    ],
+  },
+};
+
+```
+
+区别:
++ ts-loader编译是会进行语法检查的，只能在入口文件全量引入polyfill
++ babel-loader只会负责编译，并不会进行语法检查，可以按需引入polyfill
+
+## 省略扩展名extensions
+配置 resolve.extensions，默认数组['.js', '.json', '.wasm']能够使用户在引入模块时不带扩展，把用的最多的文件类型放前面，可以加快webpack解析速度。
+webpack尝试按顺序解析这些后缀名。如果有多个文件有相同的名字，但后缀名不同，webpack 会解析列在数组首位的后缀的文件,并跳过其余的后缀。使用 resolve.extensions 会 覆盖默认数组，这就意味着 webpack 将不再尝试使用默认扩展来解析模块。然而你可以使用 '...' 访问默认拓展名。
+
+```js
+// webpack.config.js
+module.exports  = {
+  resolve: {
+    extensions: [".vue", ".ts", ".scss", "..."],
+  },
+};
+
+```
+## 配置路径别名
+resolve.alias配置import或者require引入路径的别名
+
+## 模块解析
+webpack 能解析三种文件路径：
+1、绝对路径： 不需要解析了，一步到位。
+2、相对路径： 使用 import 或 require 的资源文件所处的目录，被认为是上下文目录。在 import/require 中给定的相对路径，会拼接此上下文路径，来生成模块的绝对路径。
+3、模块路径：
+
+```js
+import 'module';
+import 'module/lib/file';
+```
+（1)、按照在 resolve.modules（数组） 中指定的所有目录中检索模块，数组指定的目录优先级从左到右，权重依次降低，默认是从node_modules中搜索模块，如果想要添加一个优先于node_modules搜索
+```js
+ module.exports = {
+  //...
+  resolve: {
+    modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+ },
+}
+
+```
+如果搜索到的模块里面有package.json文件，在 resolve.exportsFields（数组）配置选项中指定的字段会被依次去package.json里面查找对应字段，默认是exports字段。如果查找exports字段，那就根据 package.json中exports的导出规则 查找模块。
+根据以上这一番操作，webpack解析出来的路径要么是一个确定文件，要么是文件夹
+
+（2)、路径是文件
+
+有扩展名，直接找到打包
+没有扩展名，那就按resolve.extensions来分析
+
+
+
+（3)、路径是文件夹
+
+
+① 如果文件夹中包含 package.json 文件，则会根据 resolve.mainFields 配置中的字段顺序查找，如果目标环境 target 是webworker, web 或者没有指定，那resolve.mainFields默认值是['browser', 'module', 'main']，如果target是其他，默认值是['module', 'main']，然后在 package.json 中根据resolve.mainFields字段顺序确定文件路径。
+
+
+② 如果不存在 package.json 文件或根据 resolve.mainFields没有找到有效路径，则会根据 resolve.mainFiles 配置选项中指定的文件名顺序查找，默认为['index']，看是否能匹配到一个存在的文件名。
+
+
+③ 然后就根据resolve.extensions来分析
+
+注意：
+
+可以通过配置别名resolve.alias来替换初始模块路径，resolve.alias 优先级高于以上三种模块解析方式
