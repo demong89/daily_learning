@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Web Worker 示例</title>
+  </head>
+  <body>
+    <h1>Web Worker 示例</h1>
+    <p>计算斐波那契数列的第 <input type="number" id="num" min="1" value="1"> 项</p>
+    <button id="calculate">计算</button>
+    <p id="result"></p>
+    <script src="./worker1.js"></script>
+    <script >
+        // 获取元素
+
+console.log('window', window);
+const numInput = window.document.getElementById('num');
+const calculateButton = window.document.getElementById('calculate');
+const resultElement = window.document.getElementById('result');
+
+// 创建 Dedicated Worker
+const myWorker = new Worker('./worker1.js');
+
+// 监听消息
+myWorker.addEventListener('message', function(e) {
+    console.log('结果：', e.data);
+  resultElement.textContent = '结果：' + e.data;
+});
+
+// 监听错误
+myWorker.addEventListener('error', function(e) {
+  console.error('Worker 错误：' + e.filename + ':' + e.lineno + ': ' + e.message);
+});
+
+// 处理点击事件
+calculateButton.addEventListener('click', function() {
+  const num = Number(numInput.value);
+
+  if (isNaN(num) || num < 1) {
+    alert('请输入一个大于等于 1 的数字！');
+    return;
+  }
+
+  // 向 Dedicated Worker 发送消息
+  myWorker.postMessage(num);
+});
+    </script>
+  </body>
+</html>
