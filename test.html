@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulate User Input without Changing Input Value</title>
+</head>
+<body>
+
+<input type="text" id="textInput" value="Initial Value">
+
+<script>
+// 获取输入框
+var input = document.getElementById('textInput');
+
+// 模拟按下键盘事件
+function simulateKeyPress(keyCode) {
+    var event = new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        keyCode: keyCode
+    });
+    input.dispatchEvent(event);
+}
+
+// 模拟用户按下 "A" 键
+setTimeout(()=>{
+    simulateKeyPress(65); // 65 是 "A" 键的键码
+    simulateKeyPress(97); // 65 是 "A" 键的键码
+}, 10)
+
+
+
+// 你可以添加更多的模拟按键事件，以模拟用户的输入行为
+input.addEventListener('keydown', function(event) {
+    // 获取按下的键的键码
+    var keyCode = event.keyCode;
+    // 输出键码到控制台
+    console.log("Key Down: " + keyCode);
+});
+
+// 监听键盘释放事件
+input.addEventListener('keyup', function(event) {
+    // 获取释放的键的键码
+    var keyCode = event.keyCode;
+    // 输出键码到控制台
+    console.log("Key Up: " + keyCode);
+});
+
+// 监听键盘按键被按下并立即释放的事件
+input.addEventListener('keypress', function(event) {
+    // 获取按下的键的键码
+    var keyCode = event.keyCode;
+    // 输出键码到控制台
+    console.log("Key Press: " + keyCode);
+});
+</script>
+
+</body>
+</html>
