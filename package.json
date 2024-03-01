@@ -19,5 +19,8 @@
   "homepage": "https://github.com/demong89/daily_learning#readme",
   "devDependencies": {
     "cm_addlongname": "^1.0.8"
+  },
+  "dependencies": {
+    "axios": "^1.6.7"
   }
 }
