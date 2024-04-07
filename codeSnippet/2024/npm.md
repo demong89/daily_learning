@@ -17,4 +17,3 @@ npm cache ls -a
 # 列出所有缓存
 npm cache ls --all
 
-# 列出所有缓存
